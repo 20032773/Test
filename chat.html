@@ -2,25 +2,19 @@
 <html lang="zh-TW">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AI 聊天室</title>
     <style>
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            -webkit-tap-highlight-color: transparent;
-        }
-
-        html, body {
-            height: 100%;
-            width: 100%;
-            overflow: hidden;
-            position: fixed;
         }
 
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            height: 100vh;
+            overflow: hidden;
             background: #2d3436;
             color: #fff;
         }
@@ -29,54 +23,49 @@
             height: 100vh;
             display: flex;
             flex-direction: column;
-            position: relative;
         }
 
         /* 頂部標題欄 */
         .header {
             background: #353b48;
-            padding: 10px 12px;
+            padding: 16px 24px;
             box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-            flex-shrink: 0;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-            z-index: 100;
-        }
-
-        .header-row {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            gap: 8px;
+            flex-shrink: 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
         }
 
         .header-left h1 {
-            font-size: 18px;
+            font-size: 24px;
             color: #f39c12;
-            margin: 0;
+            margin-bottom: 4px;
         }
 
         .room-info {
-            font-size: 11px;
+            font-size: 14px;
             color: #aaa;
-            margin-top: 2px;
+        }
+
+        .header-center {
+            display: flex;
+            align-items: center;
+            gap: 16px;
         }
 
         .status {
             display: flex;
             align-items: center;
             gap: 6px;
-            font-size: 11px;
+            font-size: 14px;
             color: #ddd;
         }
 
         .status-dot {
-            width: 6px;
-            height: 6px;
+            width: 8px;
+            height: 8px;
             border-radius: 50%;
-            flex-shrink: 0;
         }
 
         .status-dot.connected {
@@ -87,68 +76,90 @@
             background: #e74c3c;
         }
 
-        .header-controls {
+        .header-right {
             display: flex;
-            gap: 6px;
-            flex-wrap: wrap;
             align-items: center;
+            gap: 12px;
         }
 
         .username-display {
-            font-size: 12px;
+            font-size: 16px;
             color: #f39c12;
             font-weight: 600;
-            white-space: nowrap;
         }
 
         .language-selector, .room-selector {
-            padding: 5px 8px;
+            padding: 8px 12px;
             border: 1px solid rgba(255, 255, 255, 0.2);
-            border-radius: 5px;
-            font-size: 11px;
+            border-radius: 6px;
+            font-size: 14px;
             cursor: pointer;
             background: rgba(0, 0, 0, 0.3);
             color: #fff;
-            min-width: 70px;
-            max-width: 100px;
+            transition: all 0.3s;
+        }
+
+        .language-selector:hover, .room-selector:hover {
+            background: rgba(0, 0, 0, 0.5);
+            border-color: #f39c12;
+        }
+
+        .language-selector:focus, .room-selector:focus {
+            outline: none;
+            border-color: #f39c12;
         }
 
         .btn-logout {
-            padding: 5px 10px;
+            padding: 8px 16px;
             background: rgba(231, 76, 60, 0.2);
             border: 1px solid #e74c3c;
-            border-radius: 5px;
+            border-radius: 6px;
             color: #e74c3c;
-            font-size: 11px;
+            font-size: 14px;
             cursor: pointer;
-            white-space: nowrap;
+            transition: all 0.3s;
+        }
+
+        .btn-logout:hover {
+            background: #e74c3c;
+            color: white;
+        }
+
+        option {
+            background: #353b48;
+            color: #fff;
         }
 
         /* 消息區域 */
         .messages-container {
             flex: 1;
             overflow-y: auto;
-            overflow-x: hidden;
-            padding: 12px 10px 80px 10px;
+            padding: 20px;
             background: #1e272e;
-            -webkit-overflow-scrolling: touch;
-            position: relative;
+        }
+
+        .messages-container::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .messages-container::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .messages-container::-webkit-scrollbar-thumb {
+            background: rgba(243, 156, 18, 0.5);
+            border-radius: 4px;
         }
 
         .messages-wrapper {
-            max-width: 100%;
+            max-width: 800px;
+            margin: 0 auto;
         }
 
         .message {
-            margin-bottom: 10px;
+            margin-bottom: 16px;
             display: flex;
             flex-direction: column;
-            animation: fadeIn 0.3s ease-in;
-        }
-
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
         }
 
         .message.self {
@@ -160,25 +171,17 @@
         }
 
         .message-header {
-            font-size: 10px;
-            color: #888;
-            margin-bottom: 3px;
-            padding: 0 4px;
-            display: flex;
-            align-items: center;
-            gap: 4px;
-        }
-
-        .user-language {
             font-size: 12px;
+            color: #888;
+            margin-bottom: 4px;
+            padding: 0 4px;
         }
 
         .message-content {
-            max-width: 85%;
-            padding: 10px 12px;
-            border-radius: 14px;
+            max-width: 70%;
+            padding: 12px 16px;
+            border-radius: 16px;
             word-wrap: break-word;
-            word-break: break-word;
         }
 
         .message.self .message-content {
@@ -195,57 +198,52 @@
         }
 
         .message-text {
-            font-size: 14px;
+            font-size: 15px;
             line-height: 1.4;
-            white-space: pre-wrap;
         }
 
         .message-translation {
-            margin-top: 6px;
-            padding: 6px 8px;
+            margin-top: 8px;
+            padding: 8px;
             background: rgba(39, 174, 96, 0.2);
             border-radius: 8px;
-            font-size: 12px;
+            font-size: 13px;
             color: #2ecc71;
             border: 1px solid rgba(46, 204, 113, 0.3);
         }
 
         .message-time {
-            font-size: 9px;
+            font-size: 11px;
             color: rgba(255, 255, 255, 0.5);
-            margin-top: 3px;
+            margin-top: 4px;
         }
 
-        /* 輸入區域 - 固定在底部 */
+        /* 輸入區域 */
         .input-container {
-            position: fixed;
-            bottom: 0;
-            left: 0;
-            right: 0;
             background: #353b48;
-            padding: 10px 12px;
-            padding-bottom: calc(10px + env(safe-area-inset-bottom));
+            padding: 16px 24px;
             box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.3);
             display: flex;
-            gap: 8px;
+            gap: 12px;
             align-items: flex-end;
+            flex-shrink: 0;
             border-top: 1px solid rgba(255, 255, 255, 0.1);
-            z-index: 200;
         }
 
         .message-input {
             flex: 1;
-            min-height: 38px;
-            max-height: 100px;
-            padding: 10px 12px;
+            min-height: 48px;
+            max-height: 120px;
+            padding: 12px 16px;
             border: 1px solid rgba(255, 255, 255, 0.2);
-            border-radius: 19px;
-            font-size: 14px;
+            border-radius: 24px;
+            font-size: 15px;
             font-family: inherit;
             resize: none;
             outline: none;
             background: rgba(0, 0, 0, 0.3);
             color: #fff;
+            transition: all 0.3s;
         }
 
         .message-input:focus {
@@ -258,16 +256,21 @@
         }
 
         .send-button {
-            width: 70px;
-            height: 38px;
+            width: 100px;
+            height: 48px;
             background: linear-gradient(135deg, #f39c12 0%, #e67e22 100%);
             color: white;
             border: none;
-            border-radius: 19px;
-            font-size: 14px;
+            border-radius: 24px;
+            font-size: 16px;
             font-weight: 600;
             cursor: pointer;
-            flex-shrink: 0;
+            transition: all 0.2s;
+        }
+
+        .send-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(243, 156, 18, 0.4);
         }
 
         .send-button:active {
@@ -277,6 +280,8 @@
         .send-button:disabled {
             background: #555;
             cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
         }
 
         /* 確認對話框 */
@@ -287,7 +292,7 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(0, 0, 0, 0.8);
+            background: rgba(0, 0, 0, 0.7);
             z-index: 1000;
             justify-content: center;
             align-items: center;
@@ -299,40 +304,39 @@
 
         .modal-content {
             background: #353b48;
-            padding: 20px;
+            padding: 30px;
             border-radius: 12px;
-            max-width: 300px;
-            width: 85%;
+            max-width: 400px;
+            width: 90%;
             text-align: center;
             border: 1px solid rgba(255, 255, 255, 0.1);
         }
 
         .modal-content h2 {
             color: #f39c12;
-            margin-bottom: 10px;
-            font-size: 16px;
+            margin-bottom: 15px;
         }
 
         .modal-content p {
             color: #ddd;
-            margin-bottom: 16px;
-            line-height: 1.4;
-            font-size: 13px;
+            margin-bottom: 25px;
+            line-height: 1.5;
         }
 
         .modal-buttons {
             display: flex;
-            gap: 8px;
+            gap: 12px;
         }
 
         .modal-btn {
             flex: 1;
-            padding: 10px;
+            padding: 12px;
             border: none;
             border-radius: 8px;
-            font-size: 13px;
+            font-size: 16px;
             font-weight: 600;
             cursor: pointer;
+            transition: all 0.2s;
         }
 
         .modal-btn.confirm {
@@ -340,92 +344,33 @@
             color: white;
         }
 
+        .modal-btn.confirm:hover {
+            background: #c0392b;
+        }
+
         .modal-btn.cancel {
             background: rgba(255, 255, 255, 0.1);
             color: #ddd;
         }
 
-        /* 桌面版優化 */
-        @media (min-width: 769px) {
+        .modal-btn.cancel:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        @media (max-width: 768px) {
             .header {
-                padding: 16px 24px;
-                flex-direction: row;
+                flex-direction: column;
+                gap: 12px;
+                padding: 12px 16px;
+            }
+
+            .header-center, .header-right {
+                width: 100%;
                 justify-content: space-between;
             }
 
-            .header-row {
-                width: auto;
-            }
-
-            .header-left h1 {
-                font-size: 24px;
-            }
-
-            .room-info {
-                font-size: 14px;
-            }
-
-            .status {
-                font-size: 14px;
-            }
-
-            .status-dot {
-                width: 8px;
-                height: 8px;
-            }
-
-            .username-display {
-                font-size: 16px;
-            }
-
-            .language-selector, .room-selector {
-                padding: 8px 12px;
-                font-size: 14px;
-                min-width: auto;
-            }
-
-            .btn-logout {
-                padding: 8px 16px;
-                font-size: 14px;
-            }
-
-            .messages-container {
-                padding: 20px 20px 100px 20px;
-            }
-
-            .messages-wrapper {
-                max-width: 800px;
-                margin: 0 auto;
-            }
-
             .message-content {
-                max-width: 70%;
-            }
-
-            .input-container {
-                padding: 16px 24px;
-                gap: 12px;
-                position: relative;
-            }
-
-            .message-input {
-                min-height: 48px;
-                max-height: 120px;
-                padding: 12px 16px;
-                border-radius: 24px;
-                font-size: 15px;
-            }
-
-            .send-button {
-                width: 100px;
-                height: 48px;
-                border-radius: 24px;
-                font-size: 16px;
-            }
-
-            .modal-content {
-                max-width: 400px;
-                padding: 30px;
+                max-width: 85%;
             }
         }
     </style>
@@ -434,41 +379,40 @@
     <div class="chat-container">
         <!-- 頂部標題欄 -->
         <div class="header">
-            <div class="header-row">
-                <div class="header-left">
-                    <h1>AI 聊天室</h1>
-                    <div class="room-info" id="roomInfo">房間 1</div>
-                </div>
+            <div class="header-left">
+                <h1>AI 聊天室</h1>
+                <div class="room-info" id="roomInfo">房間 1</div>
+            </div>
+            <div class="header-center">
                 <div class="status">
                     <div class="status-dot" id="statusDot"></div>
                     <span id="statusText">連接中...</span>
                 </div>
+                <span id="onlineCount">0 人在線</span>
             </div>
-            <div class="header-row">
-                <div class="header-controls">
-                    <span class="username-display" id="usernameDisplay"></span>
-                    <select class="language-selector" id="languageSelector">
-                        <option value="zh-TW">🇹🇼 繁中</option>
-                        <option value="en">🇺🇸 英文</option>
-                        <option value="ja">🇯🇵 日文</option>
-                        <option value="ko">🇰🇷 韓文</option>
-                        <option value="es">🇪🇸 西文</option>
-                        <option value="fr">🇫🇷 法文</option>
-                    </select>
-                    <select class="room-selector" id="roomSelector">
-                        <option value="room-1">房間 1</option>
-                        <option value="room-2">房間 2</option>
-                        <option value="room-3">房間 3</option>
-                        <option value="room-4">房間 4</option>
-                        <option value="room-5">房間 5</option>
-                        <option value="room-6">房間 6</option>
-                        <option value="room-7">房間 7</option>
-                        <option value="room-8">房間 8</option>
-                        <option value="room-9">房間 9</option>
-                        <option value="room-10">房間 10</option>
-                    </select>
-                    <button class="btn-logout" id="logoutBtn">退出</button>
-                </div>
+            <div class="header-right">
+                <span class="username-display" id="usernameDisplay"></span>
+                <select class="language-selector" id="languageSelector">
+                    <option value="zh-TW">🇹🇼 繁體中文</option>
+                    <option value="en">🇺🇸 English</option>
+                    <option value="ja">🇯🇵 日本語</option>
+                    <option value="ko">🇰🇷 한국어</option>
+                    <option value="es">🇪🇸 Español</option>
+                    <option value="fr">🇫🇷 Français</option>
+                </select>
+                <select class="room-selector" id="roomSelector">
+                    <option value="room-1">房間 1</option>
+                    <option value="room-2">房間 2</option>
+                    <option value="room-3">房間 3</option>
+                    <option value="room-4">房間 4</option>
+                    <option value="room-5">房間 5</option>
+                    <option value="room-6">房間 6</option>
+                    <option value="room-7">房間 7</option>
+                    <option value="room-8">房間 8</option>
+                    <option value="room-9">房間 9</option>
+                    <option value="room-10">房間 10</option>
+                </select>
+                <button class="btn-logout" id="logoutBtn">退出</button>
             </div>
         </div>
 
@@ -479,7 +423,7 @@
             </div>
         </div>
 
-        <!-- 輸入區域 - 固定在底部 -->
+        <!-- 輸入區域 -->
         <div class="input-container">
             <textarea class="message-input" id="messageInput" placeholder="輸入消息..." rows="1"></textarea>
             <button class="send-button" id="sendButton">發送</button>
@@ -534,9 +478,9 @@
         document.getElementById('roomSelector').value = currentRoom;
         document.getElementById('languageSelector').value = user.language;
 
-        // 閒置計時器（10分鐘）
+        // 閒置計時器（10分鐘 = 600000毫秒）
         let idleTimer;
-        const IDLE_TIME = 10 * 60 * 1000;
+        const IDLE_TIME = 10 * 60 * 1000; // 10分鐘
 
         function resetIdleTimer() {
             clearTimeout(idleTimer);
@@ -546,10 +490,12 @@
             }, IDLE_TIME);
         }
 
-        ['mousedown', 'mousemove', 'keypress', 'scroll', 'touchstart', 'touchmove'].forEach(event => {
+        // 監聽用戶活動
+        ['mousedown', 'mousemove', 'keypress', 'scroll', 'touchstart'].forEach(event => {
             document.addEventListener(event, resetIdleTimer, true);
         });
 
+        // 啟動閒置計時器
         resetIdleTimer();
 
         // 初始化 Firebase
@@ -585,8 +531,6 @@
             }
 
             currentRoomRef = database.ref(`chatrooms/${roomId}/messages`);
-            document.getElementById('messagesWrapper').innerHTML = '';
-
             currentRoomRef.limitToLast(50).on('child_added', (snapshot) => {
                 const message = snapshot.val();
                 displayMessage(message);
@@ -601,11 +545,7 @@
             let html = '';
 
             if (message.userId !== user.userId) {
-                const userLangFlag = languageMap[message.language] ? languageMap[message.language].flag : '🌐';
-                html += `<div class="message-header">
-                    <span class="user-language">${userLangFlag}</span>
-                    <span>${message.username}</span>
-                </div>`;
+                html += `<div class="message-header">${message.username} ${languageMap[message.language].flag}</div>`;
             }
 
             html += `<div class="message-content">`;
@@ -681,7 +621,6 @@
 
             currentRoomRef.push(message);
             input.value = '';
-            input.style.height = 'auto';
         }
 
         // 語言切換
@@ -691,6 +630,8 @@
             localStorage.setItem('chatAppData', JSON.stringify(appData));
 
             document.getElementById('usernameDisplay').textContent = `${user.username} ${languageMap[user.language].flag}`;
+
+            document.getElementById('messagesWrapper').innerHTML = '';
             connectToRoom(currentRoom);
         });
 
@@ -699,6 +640,7 @@
             const newRoom = e.target.value;
             currentRoom = newRoom;
             document.getElementById('roomInfo').textContent = roomMap[newRoom];
+            document.getElementById('messagesWrapper').innerHTML = '';
             connectToRoom(newRoom);
 
             appData.currentRoom = newRoom;
@@ -719,21 +661,24 @@
         });
 
         function performLogout() {
+            // 斷開 Firebase 連接
             if (currentRoomRef) {
                 currentRoomRef.off();
             }
 
+            // 清除 localStorage
             localStorage.removeItem('chatAppData');
+
+            // 停止閒置計時器
             clearTimeout(idleTimer);
 
+            // 跳轉到設定頁面
             window.location.href = 'setup.html';
         }
 
         function scrollToBottom() {
             const container = document.getElementById('messagesContainer');
-            setTimeout(() => {
-                container.scrollTop = container.scrollHeight;
-            }, 100);
+            container.scrollTop = container.scrollHeight;
         }
 
         function escapeHtml(text) {
@@ -741,20 +686,6 @@
             div.textContent = text;
             return div.innerHTML;
         }
-
-        // 自動調整輸入框高度
-        const messageInput = document.getElementById('messageInput');
-        messageInput.addEventListener('input', function() {
-            this.style.height = 'auto';
-            this.style.height = Math.min(this.scrollHeight, 100) + 'px';
-        });
-
-        // 防止鍵盤遮擋輸入框
-        messageInput.addEventListener('focus', function() {
-            setTimeout(() => {
-                this.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-            }, 300);
-        });
     </script>
 </body>
 </html>
